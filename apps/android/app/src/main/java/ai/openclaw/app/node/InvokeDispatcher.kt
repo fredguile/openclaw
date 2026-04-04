@@ -68,7 +68,7 @@ class InvokeDispatcher(
   private val a2uiHandler: A2UIHandler,
   private val debugHandler: DebugHandler,
   private val callLogHandler: CallLogHandler,
-  private val httpHandler: HttpHandler,
+  internal val httpHandler: HttpHandler,
   private val isForeground: () -> Boolean,
   private val cameraEnabled: () -> Boolean,
   private val locationEnabled: () -> Boolean,
