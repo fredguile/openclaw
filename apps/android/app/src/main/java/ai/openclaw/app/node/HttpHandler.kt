@@ -8,7 +8,6 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.put
-import kotlinx.serialization.json.putAll
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -24,7 +23,7 @@ internal data class HttpRequest(
   val timeoutMs: Int = DEFAULT_TIMEOUT_MS,
 )
 
-internal class HttpHandler(
+class HttpHandler(
   private val json: Json = Json { ignoreUnknownKeys = true },
 ) {
   fun handleHttpRequest(paramsJson: String?): GatewaySession.InvokeResult {
@@ -107,7 +106,7 @@ internal class HttpHandler(
         val inputStream = if (responseCode >= 400) connection.errorStream else connection.inputStream
         if (inputStream != null) {
           inputStream.bufferedReader(Charsets.UTF_8).use { reader ->
-            reader.readText(MAX_BODY_SIZE_BYTES)
+            reader.readText().take(MAX_BODY_SIZE_BYTES)
           }
         } else {
           null
@@ -164,9 +163,12 @@ internal class HttpHandler(
     }
 
     val headers =
-      (obj["headers"] as? JsonObject)?.entries?.associate { (k, v) ->
-        k to (v as? JsonPrimitive)?.contentOrNull?.trim() ?: ""
-      } ?: emptyMap()
+      buildMap<String, String> {
+        obj["headers"]?.jsonObject?.entries?.forEach { (k, v) ->
+          val value = (v as? JsonPrimitive)?.contentOrNull?.trim() ?: ""
+          if (k.isNotEmpty()) put(k, value)
+        }
+      }
 
     val body = (obj["body"] as? JsonPrimitive)?.contentOrNull
 
