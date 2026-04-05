@@ -329,6 +329,8 @@ class InvokeDispatcher(
             message = "CALL_LOG_UNAVAILABLE: call log not available on this build",
           )
         }
+      InvokeCommandAvailability.HttpEnabled ->
+        null
       InvokeCommandAvailability.DebugBuild ->
         if (debugBuild()) {
           null
