@@ -92,12 +92,12 @@ describe("http.request node command", () => {
       } as never,
       client: {
         connect: {
+          minProtocol: 1,
+          maxProtocol: 3,
           commands: ["http.request"],
           role: "node",
-          minProtocol: 1,
-          maxProtocol: 1,
           client: {
-            id: "openclaw-android",
+            id: "test",
             mode: "node",
             platform: "Android 16",
             version: "test",
@@ -152,12 +152,12 @@ describe("http.request node command", () => {
       } as never,
       client: {
         connect: {
+          minProtocol: 1,
+          maxProtocol: 3,
           commands: ["http.request"],
           role: "node",
-          minProtocol: 1,
-          maxProtocol: 1,
           client: {
-            id: "openclaw-ios",
+            id: "test",
             mode: "node",
             platform: "iOS 26.0",
             version: "test",
@@ -211,12 +211,12 @@ describe("http.request node command", () => {
       } as never,
       client: {
         connect: {
+          minProtocol: 1,
+          maxProtocol: 3,
           commands: ["http.request"],
           role: "node",
-          minProtocol: 1,
-          maxProtocol: 1,
           client: {
-            id: "openclaw-android",
+            id: "test",
             mode: "node",
             platform: "Android 16",
             version: "test",
