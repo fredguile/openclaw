@@ -1,11 +1,17 @@
 ---
 name: openclaw-pr-maintainer
-description: Maintainer workflow for reviewing, triaging, preparing, closing, or landing OpenClaw pull requests and related issues. Use when Codex needs to validate bug-fix claims, search for related issues or PRs, apply or recommend close/reason labels, prepare GitHub comments safely, check review-thread follow-up, or perform maintainer-style PR decision making before merge or closure.
+description: Maintainer workflow for reviewing, triaging, preparing, closing, or landing pull requests and related issues on the @fredguile/openclaw fork. Use when Codex needs to validate bug-fix claims, search for related issues or PRs, apply or recommend close/reason labels, prepare GitHub comments safely, check review-thread follow-up, or perform maintainer-style PR decision making before merge or closure.
 ---
 
-# OpenClaw PR Maintainer
+# @fredguile/openclaw PR Maintainer
 
-Use this skill for maintainer-facing GitHub workflow, not for ordinary code changes.
+Use this skill for maintainer-facing GitHub workflow on the fork at `fredguile/openclaw`, not for ordinary code changes.
+
+## Fork identity
+
+- GitHub repo: `fredguile/openclaw`
+- NPM package: `@fredguile/openclaw`
+- All PRs, issues, and searches target the fork repo only. Never open PRs or issues against the upstream `openclaw/openclaw` repo.
 
 ## Apply close and triage labels correctly
 
@@ -45,16 +51,16 @@ Use this skill for maintainer-facing GitHub workflow, not for ordinary code chan
 ## Search broadly before deciding
 
 - Prefer targeted keyword search before proposing new work or closing something as duplicate.
-- Use `--repo openclaw/openclaw` with `--match title,body` first.
+- Use `--repo fredguile/openclaw` with `--match title,body` first.
 - Add `--match comments` when triaging follow-up discussion.
 - Do not stop at the first 500 results when the task requires a full search.
 
 Examples:
 
 ```bash
-gh search prs --repo openclaw/openclaw --match title,body --limit 50 -- "auto-update"
-gh search issues --repo openclaw/openclaw --match title,body --limit 50 -- "auto-update"
-gh search issues --repo openclaw/openclaw --match title,body --limit 50 \
+gh search prs --repo fredguile/openclaw --match title,body --limit 50 -- "auto-update"
+gh search issues --repo fredguile/openclaw --match title,body --limit 50 -- "auto-update"
+gh search issues --repo fredguile/openclaw --match title,body --limit 50 \
   --json number,title,state,url,updatedAt -- "auto update" \
   --jq '.[] | "\(.number) | \(.state) | \(.title) | \(.url)"'
 ```

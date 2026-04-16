@@ -1,25 +1,31 @@
 ---
 name: openclaw-ghsa-maintainer
-description: Maintainer workflow for OpenClaw GitHub Security Advisories (GHSA). Use when Codex needs to inspect, patch, validate, or publish a repo advisory, verify private-fork state, prepare advisory Markdown or JSON payloads safely, handle GHSA API-specific publish constraints, or confirm advisory publish success.
+description: Maintainer workflow for @fredguile/openclaw GitHub Security Advisories (GHSA). Use when Codex needs to inspect, patch, validate, or publish a repo advisory, verify private-fork state, prepare advisory Markdown or JSON payloads safely, handle GHSA API-specific publish constraints, or confirm advisory publish success.
 ---
 
-# OpenClaw GHSA Maintainer
+# @fredguile/openclaw GHSA Maintainer
 
-Use this skill for repo security advisory workflow only. Keep general release work in `openclaw-release-maintainer`.
+Use this skill for repo security advisory workflow on the fork at `fredguile/openclaw` only. Keep general release work in `openclaw-release-maintainer`.
+
+## Fork identity
+
+- GitHub repo: `fredguile/openclaw`
+- NPM package: `@fredguile/openclaw`
+- All advisory operations target the fork repo, not the upstream `openclaw/openclaw`.
 
 ## Respect advisory guardrails
 
 - Before reviewing or publishing a repo advisory, read `SECURITY.md`.
 - Ask permission before any publish action.
-- Treat this skill as GHSA-only. Do not use it for stable or beta release work.
+- Treat this skill as GHSA-only. Do not use it for stable, beta, or verified release work.
 
 ## Fetch and inspect advisory state
 
 Fetch the current advisory and the latest published npm version:
 
 ```bash
-gh api /repos/openclaw/openclaw/security-advisories/<GHSA>
-npm view openclaw version --userconfig "$(mktemp)"
+gh api /repos/fredguile/openclaw/security-advisories/<GHSA>
+npm view @fredguile/openclaw version --userconfig "$(mktemp)"
 ```
 
 Use the fetch output to confirm the advisory state, linked private fork, and vulnerability payload shape before patching.
@@ -29,7 +35,7 @@ Use the fetch output to confirm the advisory state, linked private fork, and vul
 Before publishing, verify that the advisory's private fork has no open PRs:
 
 ```bash
-fork=$(gh api /repos/openclaw/openclaw/security-advisories/<GHSA> | jq -r .private_fork.full_name)
+fork=$(gh api /repos/fredguile/openclaw/security-advisories/<GHSA> | jq -r .private_fork.full_name)
 gh pr list -R "$fork" --state open
 ```
 
@@ -61,7 +67,7 @@ jq -n --rawfile desc /tmp/ghsa.desc.md \
 Example shape:
 
 ```bash
-gh api -X PATCH /repos/openclaw/openclaw/security-advisories/<GHSA> \
+gh api -X PATCH /repos/fredguile/openclaw/security-advisories/<GHSA> \
   --input /tmp/ghsa.patch.json
 ```
 
@@ -76,7 +82,7 @@ After publish, re-fetch the advisory and confirm:
 Verification pattern:
 
 ```bash
-gh api /repos/openclaw/openclaw/security-advisories/<GHSA>
+gh api /repos/fredguile/openclaw/security-advisories/<GHSA>
 jq -r .description < /tmp/ghsa.refetch.json | rg '\\\\n'
 ```
 
