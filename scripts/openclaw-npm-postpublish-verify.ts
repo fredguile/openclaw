@@ -80,14 +80,6 @@ export function buildPublishedInstallScenarios(version: string): PublishedInstal
     });
   }
 
-  if (parsed.channel === "verified") {
-    scenarios.push({
-      name: "upgrade-from-upstream-base",
-      installSpecs: [`openclaw@${parsed.baseVersion}`, exactSpec],
-      expectedVersion: version,
-    });
-  }
-
   return scenarios;
 }
 
