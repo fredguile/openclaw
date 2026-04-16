@@ -25,10 +25,10 @@ export type ResolvedGlobalInstallTarget = ResolvedGlobalInstallCommand & {
   packageRoot: string | null;
 };
 
-const PRIMARY_PACKAGE_NAME = "openclaw";
+const PRIMARY_PACKAGE_NAME = "@fredguile/openclaw";
 const ALL_PACKAGE_NAMES = [PRIMARY_PACKAGE_NAME] as const;
 const GLOBAL_RENAME_PREFIX = ".";
-export const OPENCLAW_MAIN_PACKAGE_SPEC = "github:openclaw/openclaw#main";
+export const OPENCLAW_MAIN_PACKAGE_SPEC = "github:fredguile/openclaw#main";
 const COREPACK_ENABLE_DOWNLOAD_PROMPT_DEFAULT = "0";
 const NPM_GLOBAL_INSTALL_QUIET_FLAGS = ["--no-fund", "--no-audit", "--loglevel=error"] as const;
 const NPM_GLOBAL_INSTALL_OMIT_OPTIONAL_FLAGS = [
@@ -212,7 +212,10 @@ function inferNpmPrefixFromPackageRoot(pkgRoot?: string | null): string | null {
     return null;
   }
   const normalized = path.resolve(trimmed);
-  const nodeModulesDir = path.dirname(normalized);
+  let nodeModulesDir = path.dirname(normalized);
+  if (path.basename(nodeModulesDir).startsWith("@")) {
+    nodeModulesDir = path.dirname(nodeModulesDir);
+  }
   if (path.basename(nodeModulesDir) !== "node_modules") {
     return null;
   }
@@ -433,7 +436,7 @@ export async function cleanupGlobalRenameDirs(params: {
   if (!root || !name) {
     return { removed };
   }
-  const prefix = `${GLOBAL_RENAME_PREFIX}${name}-`;
+  const prefix = `${GLOBAL_RENAME_PREFIX}${name.replace(/\//g, "__")}-`;
   let entries: string[] = [];
   try {
     entries = await fs.readdir(root);

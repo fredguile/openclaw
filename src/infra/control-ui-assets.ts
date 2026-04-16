@@ -103,7 +103,7 @@ export async function resolveControlUiDistIndexPath(
     return path.join(packageRoot, "dist", "control-ui", "index.html");
   }
 
-  // Fallback: traverse up and find package.json with name "openclaw" + dist/control-ui/index.html
+  // Fallback: traverse up and find package.json with name "@fredguile/openclaw" + dist/control-ui/index.html
   // This handles global installs where path-based resolution might fail.
   const fallbackStartDirs = new Set(
     entrypointCandidates.map((candidate) => path.dirname(candidate)),
@@ -117,7 +117,7 @@ export async function resolveControlUiDistIndexPath(
         try {
           const raw = controlUiFsRuntime.readFileSync(pkgJsonPath, "utf-8");
           const parsed = JSON.parse(raw) as { name?: unknown };
-          if (parsed.name === "openclaw") {
+          if (parsed.name === "@fredguile/openclaw") {
             return controlUiFsRuntime.existsSync(indexPath) ? indexPath : null;
           }
           // Stop at the first package boundary to avoid resolving through unrelated ancestors.

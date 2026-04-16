@@ -57,4 +57,9 @@ describe("shouldRequireNpmDistTagMirrorAuth", () => {
       }),
     ).toBe(false);
   });
+
+  it("mirrors beta dist-tag for verified releases", () => {
+    const plan = resolveNpmPublishPlan("2026.4.1-verified.1");
+    expect(plan.mirrorDistTags).toContain("beta");
+  });
 });

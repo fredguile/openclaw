@@ -1,6 +1,8 @@
 const STABLE_VERSION_REGEX = /^(?<year>\d{4})\.(?<month>[1-9]\d?)\.(?<day>[1-9]\d?)$/;
 const BETA_VERSION_REGEX =
   /^(?<year>\d{4})\.(?<month>[1-9]\d?)\.(?<day>[1-9]\d?)-beta\.(?<beta>[1-9]\d*)$/;
+const VERIFIED_VERSION_REGEX =
+  /^(?<year>\d{4})\.(?<month>[1-9]\d?)\.(?<day>[1-9]\d?)-verified\.(?<verified>[1-9]\d*)$/;
 const CORRECTION_VERSION_REGEX =
   /^(?<year>\d{4})\.(?<month>[1-9]\d?)\.(?<day>[1-9]\d?)-(?<correction>[1-9]\d*)$/;
 
@@ -8,11 +10,12 @@ const CORRECTION_VERSION_REGEX =
  * @typedef {object} ParsedReleaseVersion
  * @property {string} version
  * @property {string} baseVersion
- * @property {"stable" | "beta"} channel
+ * @property {"stable" | "beta" | "verified"} channel
  * @property {number} year
  * @property {number} month
  * @property {number} day
  * @property {number | undefined} [betaNumber]
+ * @property {number | undefined} [verifiedNumber]
  * @property {number | undefined} [correctionNumber]
  * @property {Date} date
  */
@@ -45,6 +48,8 @@ function parseDateParts(version, groups, channel) {
   const month = Number.parseInt(groups.month ?? "", 10);
   const day = Number.parseInt(groups.day ?? "", 10);
   const betaNumber = channel === "beta" ? Number.parseInt(groups.beta ?? "", 10) : undefined;
+  const verifiedNumber =
+    channel === "verified" ? Number.parseInt(groups.verified ?? "", 10) : undefined;
 
   if (
     !Number.isInteger(year) ||
@@ -58,6 +63,9 @@ function parseDateParts(version, groups, channel) {
     return null;
   }
   if (channel === "beta" && (!Number.isInteger(betaNumber) || (betaNumber ?? 0) < 1)) {
+    return null;
+  }
+  if (channel === "verified" && (!Number.isInteger(verifiedNumber) || (verifiedNumber ?? 0) < 1)) {
     return null;
   }
 
@@ -78,6 +86,7 @@ function parseDateParts(version, groups, channel) {
     month,
     day,
     betaNumber,
+    verifiedNumber,
     date,
   };
 }
@@ -100,6 +109,11 @@ export function parseReleaseVersion(version) {
   const betaMatch = BETA_VERSION_REGEX.exec(trimmed);
   if (betaMatch?.groups) {
     return parseDateParts(trimmed, betaMatch.groups, "beta");
+  }
+
+  const verifiedMatch = VERIFIED_VERSION_REGEX.exec(trimmed);
+  if (verifiedMatch?.groups) {
+    return parseDateParts(trimmed, verifiedMatch.groups, "verified");
   }
 
   const correctionMatch = CORRECTION_VERSION_REGEX.exec(trimmed);
@@ -136,12 +150,19 @@ export function compareReleaseVersions(left, right) {
     return Math.sign(dateDelta);
   }
 
+  const channelOrder = { beta: 0, verified: 1, stable: 2 };
   if (parsedLeft.channel !== parsedRight.channel) {
-    return parsedLeft.channel === "stable" ? 1 : -1;
+    return Math.sign(
+      (channelOrder[parsedLeft.channel] ?? 0) - (channelOrder[parsedRight.channel] ?? 0),
+    );
   }
 
   if (parsedLeft.channel === "beta" && parsedRight.channel === "beta") {
     return Math.sign((parsedLeft.betaNumber ?? 0) - (parsedRight.betaNumber ?? 0));
+  }
+
+  if (parsedLeft.channel === "verified" && parsedRight.channel === "verified") {
+    return Math.sign((parsedLeft.verifiedNumber ?? 0) - (parsedRight.verifiedNumber ?? 0));
   }
 
   return Math.sign((parsedLeft.correctionNumber ?? 0) - (parsedRight.correctionNumber ?? 0));
@@ -163,6 +184,26 @@ export function resolveNpmPublishPlan(version, currentBetaVersion) {
       channel: "beta",
       publishTag: "beta",
       mirrorDistTags: [],
+    };
+  }
+
+  if (parsedVersion.channel === "verified") {
+    const normalizedCurrentBeta = currentBetaVersion?.trim();
+    if (normalizedCurrentBeta) {
+      const betaVsVerified = compareReleaseVersions(normalizedCurrentBeta, version);
+      if (betaVsVerified !== null && betaVsVerified > 0) {
+        return {
+          channel: "verified",
+          publishTag: "latest",
+          mirrorDistTags: [],
+        };
+      }
+    }
+
+    return {
+      channel: "verified",
+      publishTag: "latest",
+      mirrorDistTags: ["beta"],
     };
   }
 
