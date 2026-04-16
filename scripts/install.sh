@@ -1965,7 +1965,7 @@ resolve_package_install_spec() {
     local package_name="$1"
     local value="$2"
     if [[ "${value,,}" == "main" ]]; then
-        echo "github:openclaw/openclaw#main"
+        echo "github:fredguile/openclaw#main"
         return 0
     fi
     if is_explicit_package_install_spec "$value"; then

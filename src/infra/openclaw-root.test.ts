@@ -27,7 +27,7 @@ function setFile(p: string, content = "") {
   state.entries.set(abs(p), { kind: "file", content });
 }
 
-function setPackageRoot(root: string, name = "openclaw") {
+function setPackageRoot(root: string, name = "@fredguile/openclaw") {
   setFile(path.join(root, "package.json"), JSON.stringify({ name }));
 }
 
@@ -127,7 +127,7 @@ describe("resolveOpenClawPackageRoot", () => {
       setup: () => {
         const project = fx("bin-scenario");
         const argv1 = path.join(project, "node_modules", ".bin", "openclaw");
-        const pkgRoot = path.join(project, "node_modules", "openclaw");
+        const pkgRoot = path.join(project, "node_modules", "@fredguile", "openclaw");
         setPackageRoot(pkgRoot);
         return { opts: { argv1 }, expected: pkgRoot };
       },
@@ -148,7 +148,7 @@ describe("resolveOpenClawPackageRoot", () => {
       setup: () => {
         const project = fx("realpath-throw-scenario");
         const argv1 = path.join(project, "node_modules", ".bin", "openclaw");
-        const pkgRoot = path.join(project, "node_modules", "openclaw");
+        const pkgRoot = path.join(project, "node_modules", "@fredguile", "openclaw");
         state.realpathErrors.add(abs(argv1));
         setPackageRoot(pkgRoot);
         return { opts: { argv1 }, expected: pkgRoot };
@@ -209,7 +209,7 @@ describe("resolveOpenClawPackageRoot", () => {
           abs(argv1),
           abs(path.join(project, "versions", "current", "openclaw.mjs")),
         );
-        const pkgRoot = path.join(project, "node_modules", "openclaw");
+        const pkgRoot = path.join(project, "node_modules", "@fredguile", "openclaw");
         setPackageRoot(pkgRoot);
         return { opts: { argv1 }, expected: pkgRoot };
       },

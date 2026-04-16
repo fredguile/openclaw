@@ -412,7 +412,7 @@ describe("update-cli", () => {
     vi.spyOn(updateCliShared, "readPackageName").mockImplementation(readPackageName);
     vi.spyOn(updateCliShared, "readPackageVersion").mockImplementation(readPackageVersion);
     vi.spyOn(updateCliShared, "resolveGlobalManager").mockImplementation(resolveGlobalManager);
-    readPackageName.mockResolvedValue("openclaw");
+    readPackageName.mockResolvedValue("@fredguile/openclaw");
     readPackageVersion.mockResolvedValue("1.0.0");
     resolveGlobalManager.mockResolvedValue("npm");
     serviceLoaded.mockResolvedValue(false);
@@ -658,7 +658,15 @@ describe("update-cli", () => {
       } else {
         expect(runGatewayUpdate).not.toHaveBeenCalled();
         expect(runCommandWithTimeout).toHaveBeenCalledWith(
-          ["npm", "i", "-g", "openclaw@latest", "--no-fund", "--no-audit", "--loglevel=error"],
+          [
+            "npm",
+            "i",
+            "-g",
+            "@fredguile/openclaw@latest",
+            "--no-fund",
+            "--no-audit",
+            "--loglevel=error",
+          ],
           expect.any(Object),
         );
       }
@@ -689,7 +697,15 @@ describe("update-cli", () => {
 
     expect(runGatewayUpdate).not.toHaveBeenCalled();
     expect(runCommandWithTimeout).toHaveBeenCalledWith(
-      ["npm", "i", "-g", "openclaw@latest", "--no-fund", "--no-audit", "--loglevel=error"],
+      [
+        "npm",
+        "i",
+        "-g",
+        "@fredguile/openclaw@latest",
+        "--no-fund",
+        "--no-audit",
+        "--loglevel=error",
+      ],
       expect.any(Object),
     );
   });
@@ -707,7 +723,15 @@ describe("update-cli", () => {
 
     expect(runGatewayUpdate).not.toHaveBeenCalled();
     expect(runCommandWithTimeout).not.toHaveBeenCalledWith(
-      ["npm", "i", "-g", "openclaw@latest", "--no-fund", "--no-audit", "--loglevel=error"],
+      [
+        "npm",
+        "i",
+        "-g",
+        "@fredguile/openclaw@latest",
+        "--no-fund",
+        "--no-audit",
+        "--loglevel=error",
+      ],
       expect.any(Object),
     );
     expect(defaultRuntime.exit).toHaveBeenCalledWith(1);
@@ -725,7 +749,7 @@ describe("update-cli", () => {
         mockPackageInstallStatus(createCaseDir("openclaw-update"));
         await updateCommand({ tag: "next" });
       },
-      expectedSpec: "openclaw@next",
+      expectedSpec: "@fredguile/openclaw@next",
     },
     {
       name: "main shorthand",
@@ -733,15 +757,15 @@ describe("update-cli", () => {
         mockPackageInstallStatus(createCaseDir("openclaw-update"));
         await updateCommand({ yes: true, tag: "main" });
       },
-      expectedSpec: "github:openclaw/openclaw#main",
+      expectedSpec: "github:fredguile/openclaw#main",
     },
     {
       name: "explicit git package spec",
       run: async () => {
         mockPackageInstallStatus(createCaseDir("openclaw-update"));
-        await updateCommand({ yes: true, tag: "github:openclaw/openclaw#main" });
+        await updateCommand({ yes: true, tag: "github:fredguile/openclaw#main" });
       },
-      expectedSpec: "github:openclaw/openclaw#main",
+      expectedSpec: "github:fredguile/openclaw#main",
     },
     {
       name: "OPENCLAW_UPDATE_PACKAGE_SPEC override",
@@ -760,7 +784,7 @@ describe("update-cli", () => {
     "resolves package install specs from tags and env overrides: $name",
     async ({ run, expectedSpec }) => {
       vi.clearAllMocks();
-      readPackageName.mockResolvedValue("openclaw");
+      readPackageName.mockResolvedValue("@fredguile/openclaw");
       readPackageVersion.mockResolvedValue("1.0.0");
       resolveGlobalManager.mockResolvedValue("npm");
       vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue(process.cwd());
@@ -772,12 +796,12 @@ describe("update-cli", () => {
   it("fails package updates when the installed correction version does not match the requested target", async () => {
     const tempDir = createCaseDir("openclaw-update");
     const nodeModules = path.join(tempDir, "node_modules");
-    const pkgRoot = path.join(nodeModules, "openclaw");
+    const pkgRoot = path.join(nodeModules, "@fredguile", "openclaw");
     mockPackageInstallStatus(tempDir);
     await fs.mkdir(pkgRoot, { recursive: true });
     await fs.writeFile(
       path.join(pkgRoot, "package.json"),
-      JSON.stringify({ name: "openclaw", version: "2026.3.23" }),
+      JSON.stringify({ name: "@fredguile/openclaw", version: "2026.3.23" }),
       "utf-8",
     );
     for (const relativePath of TEST_BUNDLED_RUNTIME_SIDECAR_PATHS) {
@@ -825,7 +849,7 @@ describe("update-cli", () => {
     const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("darwin");
     const brewPrefix = createCaseDir("brew-prefix");
     const brewRoot = path.join(brewPrefix, "lib", "node_modules");
-    const pkgRoot = path.join(brewRoot, "openclaw");
+    const pkgRoot = path.join(brewRoot, "@fredguile", "openclaw");
     const brewNpm = path.join(brewPrefix, "bin", "npm");
     const win32PrefixNpm = path.join(brewPrefix, "npm.cmd");
     const pathNpmRoot = createCaseDir("nvm-root");
@@ -889,7 +913,7 @@ describe("update-cli", () => {
           isOwningNpmCommand(argv[0], brewPrefix) &&
           argv[1] === "i" &&
           argv[2] === "-g" &&
-          argv[3] === "openclaw@latest",
+          argv[3] === "@fredguile/openclaw@latest",
       );
 
     expect(installCall).toBeDefined();

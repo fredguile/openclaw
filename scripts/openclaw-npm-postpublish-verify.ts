@@ -63,7 +63,7 @@ export function buildPublishedInstallScenarios(version: string): PublishedInstal
     throw new Error(`Unsupported release version "${version}".`);
   }
 
-  const exactSpec = `openclaw@${version}`;
+  const exactSpec = `@fredguile/openclaw@${version}`;
   const scenarios: PublishedInstallScenario[] = [
     {
       name: "fresh-exact",
@@ -75,6 +75,14 @@ export function buildPublishedInstallScenarios(version: string): PublishedInstal
   if (parsed.channel === "stable" && parsed.correctionNumber !== undefined) {
     scenarios.push({
       name: "upgrade-from-base-stable",
+      installSpecs: [`@fredguile/openclaw@${parsed.baseVersion}`, exactSpec],
+      expectedVersion: version,
+    });
+  }
+
+  if (parsed.channel === "verified") {
+    scenarios.push({
+      name: "upgrade-from-upstream-base",
       installSpecs: [`openclaw@${parsed.baseVersion}`, exactSpec],
       expectedVersion: version,
     });
@@ -111,7 +119,9 @@ export function collectInstalledPackageErrors(params: {
 
 export function normalizeInstalledBinaryVersion(output: string): string {
   const trimmed = output.trim();
-  const versionMatch = /\b\d{4}\.\d{1,2}\.\d{1,2}(?:-\d+|-beta\.\d+)?\b/u.exec(trimmed);
+  const versionMatch = /\b\d{4}\.\d{1,2}\.\d{1,2}(?:-\d+|-beta\.\d+|-verified\.\d+)?\b/u.exec(
+    trimmed,
+  );
   return versionMatch?.[0] ?? trimmed;
 }
 
@@ -354,7 +364,7 @@ function verifyScenario(version: string, scenario: PublishedInstallScenario): vo
     }
 
     const globalRoot = resolveGlobalRoot(prefixDir, workingDir);
-    const packageRoot = join(globalRoot, "openclaw");
+    const packageRoot = join(globalRoot, "@fredguile", "openclaw");
     const pkg = JSON.parse(
       readFileSync(join(packageRoot, "package.json"), "utf8"),
     ) as InstalledPackageJson;

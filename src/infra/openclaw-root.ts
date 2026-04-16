@@ -2,7 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { openClawRootFs, openClawRootFsSync } from "./openclaw-root.fs.runtime.js";
 
-const CORE_PACKAGE_NAMES = new Set(["openclaw"]);
+const CORE_PACKAGE_NAMES = new Set(["@fredguile/openclaw"]);
 
 function parsePackageName(raw: string): string | null {
   const parsed = JSON.parse(raw) as { name?: unknown };
@@ -80,6 +80,11 @@ function candidateDirsFromArgv1(argv1: string): string[] {
     const binName = path.basename(normalized);
     const nodeModulesDir = parts.slice(0, binIndex).join(path.sep);
     candidates.push(path.join(nodeModulesDir, binName));
+    for (const pkgName of CORE_PACKAGE_NAMES) {
+      if (pkgName.startsWith("@")) {
+        candidates.push(path.join(nodeModulesDir, pkgName));
+      }
+    }
   }
   return candidates;
 }

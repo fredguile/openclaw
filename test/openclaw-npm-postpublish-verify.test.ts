@@ -18,7 +18,7 @@ describe("buildPublishedInstallScenarios", () => {
     expect(buildPublishedInstallScenarios("2026.3.23")).toEqual([
       {
         name: "fresh-exact",
-        installSpecs: ["openclaw@2026.3.23"],
+        installSpecs: ["@fredguile/openclaw@2026.3.23"],
         expectedVersion: "2026.3.23",
       },
     ]);
@@ -28,13 +28,28 @@ describe("buildPublishedInstallScenarios", () => {
     expect(buildPublishedInstallScenarios("2026.3.23-2")).toEqual([
       {
         name: "fresh-exact",
-        installSpecs: ["openclaw@2026.3.23-2"],
+        installSpecs: ["@fredguile/openclaw@2026.3.23-2"],
         expectedVersion: "2026.3.23-2",
       },
       {
         name: "upgrade-from-base-stable",
-        installSpecs: ["openclaw@2026.3.23", "openclaw@2026.3.23-2"],
+        installSpecs: ["@fredguile/openclaw@2026.3.23", "@fredguile/openclaw@2026.3.23-2"],
         expectedVersion: "2026.3.23-2",
+      },
+    ]);
+  });
+
+  it("adds an upstream-to-verified upgrade scenario for verified releases", () => {
+    expect(buildPublishedInstallScenarios("2026.3.23-verified.1")).toEqual([
+      {
+        name: "fresh-exact",
+        installSpecs: ["@fredguile/openclaw@2026.3.23-verified.1"],
+        expectedVersion: "2026.3.23-verified.1",
+      },
+      {
+        name: "upgrade-from-upstream-base",
+        installSpecs: ["openclaw@2026.3.23", "@fredguile/openclaw@2026.3.23-verified.1"],
+        expectedVersion: "2026.3.23-verified.1",
       },
     ]);
   });
@@ -42,14 +57,17 @@ describe("buildPublishedInstallScenarios", () => {
 
 describe("buildPublishedInstallCommandArgs", () => {
   it("runs lifecycle scripts for published install verification", () => {
-    const args = buildPublishedInstallCommandArgs("/tmp/openclaw-prefix", "openclaw@2026.4.10");
+    const args = buildPublishedInstallCommandArgs(
+      "/tmp/openclaw-prefix",
+      "@fredguile/openclaw@2026.4.10",
+    );
 
     expect(args).toEqual([
       "install",
       "-g",
       "--prefix",
       "/tmp/openclaw-prefix",
-      "openclaw@2026.4.10",
+      "@fredguile/openclaw@2026.4.10",
       "--no-fund",
       "--no-audit",
     ]);
@@ -127,6 +145,9 @@ describe("normalizeInstalledBinaryVersion", () => {
     expect(normalizeInstalledBinaryVersion("OpenClaw 2026.4.8 (9ece252)")).toBe("2026.4.8");
     expect(normalizeInstalledBinaryVersion("OpenClaw 2026.4.8-beta.1 (9ece252)")).toBe(
       "2026.4.8-beta.1",
+    );
+    expect(normalizeInstalledBinaryVersion("OpenClaw 2026.4.8-verified.1 (9ece252)")).toBe(
+      "2026.4.8-verified.1",
     );
   });
 });

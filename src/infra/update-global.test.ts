@@ -39,12 +39,12 @@ describe("update global helpers", () => {
     envSnapshot = captureEnv(["OPENCLAW_UPDATE_PACKAGE_SPEC"]);
     process.env.OPENCLAW_UPDATE_PACKAGE_SPEC = "file:/tmp/openclaw.tgz";
 
-    expect(resolveGlobalInstallSpec({ packageName: "openclaw", tag: "latest" })).toBe(
+    expect(resolveGlobalInstallSpec({ packageName: "@fredguile/openclaw", tag: "latest" })).toBe(
       "file:/tmp/openclaw.tgz",
     );
     expect(
       resolveGlobalInstallSpec({
-        packageName: "openclaw",
+        packageName: "@fredguile/openclaw",
         tag: "beta",
         env: { OPENCLAW_UPDATE_PACKAGE_SPEC: "openclaw@next" },
       }),
@@ -68,23 +68,23 @@ describe("update global helpers", () => {
       path.join(".bun", "install", "global", "node_modules"),
     );
     await expect(resolveGlobalPackageRoot("npm", runCommand, 1000)).resolves.toBe(
-      path.join("/tmp/npm-root", "openclaw"),
+      path.join("/tmp/npm-root", "@fredguile", "openclaw"),
     );
   });
 
   it("maps main and explicit install specs for global installs", () => {
-    expect(resolveGlobalInstallSpec({ packageName: "openclaw", tag: "main" })).toBe(
+    expect(resolveGlobalInstallSpec({ packageName: "@fredguile/openclaw", tag: "main" })).toBe(
       OPENCLAW_MAIN_PACKAGE_SPEC,
     );
     expect(
       resolveGlobalInstallSpec({
-        packageName: "openclaw",
+        packageName: "@fredguile/openclaw",
         tag: "github:openclaw/openclaw#feature/my-branch",
       }),
     ).toBe("github:openclaw/openclaw#feature/my-branch");
     expect(
       resolveGlobalInstallSpec({
-        packageName: "openclaw",
+        packageName: "@fredguile/openclaw",
         tag: "https://example.com/openclaw-main.tgz",
       }),
     ).toBe("https://example.com/openclaw-main.tgz");
@@ -125,10 +125,10 @@ describe("update global helpers", () => {
       const npmRoot = path.join(base, "npm-root");
       const pnpmRoot = path.join(base, "pnpm-root");
       const bunRoot = path.join(base, ".bun", "install", "global", "node_modules");
-      const pkgRoot = path.join(pnpmRoot, "openclaw");
+      const pkgRoot = path.join(pnpmRoot, "@fredguile", "openclaw");
       await fs.mkdir(pkgRoot, { recursive: true });
-      await fs.mkdir(path.join(npmRoot, "openclaw"), { recursive: true });
-      await fs.mkdir(path.join(bunRoot, "openclaw"), { recursive: true });
+      await fs.mkdir(path.join(npmRoot, "@fredguile", "openclaw"), { recursive: true });
+      await fs.mkdir(path.join(bunRoot, "@fredguile", "openclaw"), { recursive: true });
 
       envSnapshot = captureEnv(["BUN_INSTALL"]);
       process.env.BUN_INSTALL = path.join(base, ".bun");
@@ -148,8 +148,8 @@ describe("update global helpers", () => {
       );
       await expect(detectGlobalInstallManagerByPresence(runCommand, 1000)).resolves.toBe("npm");
 
-      await fs.rm(path.join(npmRoot, "openclaw"), { recursive: true, force: true });
-      await fs.rm(path.join(pnpmRoot, "openclaw"), { recursive: true, force: true });
+      await fs.rm(path.join(npmRoot, "@fredguile", "openclaw"), { recursive: true, force: true });
+      await fs.rm(path.join(pnpmRoot, "@fredguile", "openclaw"), { recursive: true, force: true });
       await expect(detectGlobalInstallManagerByPresence(runCommand, 1000)).resolves.toBe("bun");
     });
   });
@@ -161,7 +161,7 @@ describe("update global helpers", () => {
         const brewPrefix = path.join(base, "opt", "homebrew");
         const brewBin = path.join(brewPrefix, "bin");
         const brewRoot = path.join(brewPrefix, "lib", "node_modules");
-        const pkgRoot = path.join(brewRoot, "openclaw");
+        const pkgRoot = path.join(brewRoot, "@fredguile", "openclaw");
         const pathNpmRoot = path.join(base, "nvm", "lib", "node_modules");
         const brewNpm = path.join(brewBin, "npm");
         await fs.mkdir(pkgRoot, { recursive: true });
@@ -201,20 +201,20 @@ describe("update global helpers", () => {
           globalRoot: brewRoot,
           packageRoot: pkgRoot,
         });
-        expect(globalInstallArgs("npm", "openclaw@latest", pkgRoot)).toEqual([
+        expect(globalInstallArgs("npm", "@fredguile/openclaw@latest", pkgRoot)).toEqual([
           brewNpm,
           "i",
           "-g",
-          "openclaw@latest",
+          "@fredguile/openclaw@latest",
           "--no-fund",
           "--no-audit",
           "--loglevel=error",
         ]);
-        expect(globalInstallFallbackArgs("npm", "openclaw@latest", pkgRoot)).toEqual([
+        expect(globalInstallFallbackArgs("npm", "@fredguile/openclaw@latest", pkgRoot)).toEqual([
           brewNpm,
           "i",
           "-g",
-          "openclaw@latest",
+          "@fredguile/openclaw@latest",
           "--omit=optional",
           "--no-fund",
           "--no-audit",
@@ -229,7 +229,7 @@ describe("update global helpers", () => {
   it("does not infer npm ownership from path shape alone when the owning npm binary is absent", async () => {
     await withTempDir({ prefix: "openclaw-update-npm-missing-bin-" }, async (base) => {
       const brewRoot = path.join(base, "opt", "homebrew", "lib", "node_modules");
-      const pkgRoot = path.join(brewRoot, "openclaw");
+      const pkgRoot = path.join(brewRoot, "@fredguile", "openclaw");
       const pathNpmRoot = path.join(base, "nvm", "lib", "node_modules");
       await fs.mkdir(pkgRoot, { recursive: true });
 
@@ -246,11 +246,11 @@ describe("update global helpers", () => {
       await expect(
         detectGlobalInstallManagerForRoot(runCommand, pkgRoot, 1000),
       ).resolves.toBeNull();
-      expect(globalInstallArgs("npm", "openclaw@latest", pkgRoot)).toEqual([
+      expect(globalInstallArgs("npm", "@fredguile/openclaw@latest", pkgRoot)).toEqual([
         "npm",
         "i",
         "-g",
-        "openclaw@latest",
+        "@fredguile/openclaw@latest",
         "--no-fund",
         "--no-audit",
         "--loglevel=error",
@@ -264,7 +264,7 @@ describe("update global helpers", () => {
       await withTempDir({ prefix: "openclaw-update-win32-npm-prefix-" }, async (base) => {
         const npmPrefix = path.join(base, "Roaming", "npm");
         const npmRoot = path.join(npmPrefix, "node_modules");
-        const pkgRoot = path.join(npmRoot, "openclaw");
+        const pkgRoot = path.join(npmRoot, "@fredguile", "openclaw");
         const npmCmd = path.join(npmPrefix, "npm.cmd");
         const pathNpmRoot = path.join(base, "nvm", "node_modules");
         await fs.mkdir(pkgRoot, { recursive: true });
@@ -287,11 +287,11 @@ describe("update global helpers", () => {
           "npm",
         );
         await expect(resolveGlobalRoot("npm", runCommand, 1000, pkgRoot)).resolves.toBe(npmRoot);
-        expect(globalInstallArgs("npm", "openclaw@latest", pkgRoot)).toEqual([
+        expect(globalInstallArgs("npm", "@fredguile/openclaw@latest", pkgRoot)).toEqual([
           npmCmd,
           "i",
           "-g",
-          "openclaw@latest",
+          "@fredguile/openclaw@latest",
           "--no-fund",
           "--no-audit",
           "--loglevel=error",
@@ -307,61 +307,64 @@ describe("update global helpers", () => {
       manager: "npm",
       command: "npm",
     });
-    expect(globalInstallArgs("npm", "openclaw@latest")).toEqual([
+    expect(globalInstallArgs("npm", "@fredguile/openclaw@latest")).toEqual([
       "npm",
       "i",
       "-g",
-      "openclaw@latest",
+      "@fredguile/openclaw@latest",
       "--no-fund",
       "--no-audit",
       "--loglevel=error",
     ]);
-    expect(globalInstallArgs("pnpm", "openclaw@latest")).toEqual([
+    expect(globalInstallArgs("pnpm", "@fredguile/openclaw@latest")).toEqual([
       "pnpm",
       "add",
       "-g",
-      "openclaw@latest",
+      "@fredguile/openclaw@latest",
     ]);
-    expect(globalInstallArgs("bun", "openclaw@latest")).toEqual([
+    expect(globalInstallArgs("bun", "@fredguile/openclaw@latest")).toEqual([
       "bun",
       "add",
       "-g",
-      "openclaw@latest",
+      "@fredguile/openclaw@latest",
     ]);
 
-    expect(globalInstallFallbackArgs("npm", "openclaw@latest")).toEqual([
+    expect(globalInstallFallbackArgs("npm", "@fredguile/openclaw@latest")).toEqual([
       "npm",
       "i",
       "-g",
-      "openclaw@latest",
+      "@fredguile/openclaw@latest",
       "--omit=optional",
       "--no-fund",
       "--no-audit",
       "--loglevel=error",
     ]);
-    expect(globalInstallFallbackArgs("pnpm", "openclaw@latest")).toBeNull();
+    expect(globalInstallFallbackArgs("pnpm", "@fredguile/openclaw@latest")).toBeNull();
     expect(
-      globalInstallArgs({ manager: "pnpm", command: "/opt/homebrew/bin/pnpm" }, "openclaw@latest"),
-    ).toEqual(["/opt/homebrew/bin/pnpm", "add", "-g", "openclaw@latest"]);
+      globalInstallArgs(
+        { manager: "pnpm", command: "/opt/homebrew/bin/pnpm" },
+        "@fredguile/openclaw@latest",
+      ),
+    ).toEqual(["/opt/homebrew/bin/pnpm", "add", "-g", "@fredguile/openclaw@latest"]);
   });
 
   it("cleans only renamed package directories", async () => {
     await withTempDir({ prefix: "openclaw-update-cleanup-" }, async (root) => {
-      await fs.mkdir(path.join(root, ".openclaw-123"), { recursive: true });
-      await fs.mkdir(path.join(root, ".openclaw-456"), { recursive: true });
-      await fs.writeFile(path.join(root, ".openclaw-file"), "nope", "utf8");
-      await fs.mkdir(path.join(root, "openclaw"), { recursive: true });
+      await fs.mkdir(path.join(root, ".@fredguile__openclaw-123"), { recursive: true });
+      await fs.mkdir(path.join(root, ".@fredguile__openclaw-456"), { recursive: true });
+      await fs.writeFile(path.join(root, ".unrelated-file"), "nope", "utf8");
+      await fs.mkdir(path.join(root, "@fredguile", "openclaw"), { recursive: true });
 
       await expect(
         cleanupGlobalRenameDirs({
           globalRoot: root,
-          packageName: "openclaw",
+          packageName: "@fredguile/openclaw",
         }),
       ).resolves.toEqual({
-        removed: [".openclaw-123", ".openclaw-456"],
+        removed: [".@fredguile__openclaw-123", ".@fredguile__openclaw-456"],
       });
-      await expect(fs.stat(path.join(root, "openclaw"))).resolves.toBeDefined();
-      await expect(fs.stat(path.join(root, ".openclaw-file"))).resolves.toBeDefined();
+      await expect(fs.stat(path.join(root, "@fredguile", "openclaw"))).resolves.toBeDefined();
+      await expect(fs.stat(path.join(root, ".unrelated-file"))).resolves.toBeDefined();
     });
   });
 
@@ -369,7 +372,7 @@ describe("update global helpers", () => {
     await withTempDir({ prefix: "openclaw-update-global-pkg-" }, async (packageRoot) => {
       await fs.writeFile(
         path.join(packageRoot, "package.json"),
-        JSON.stringify({ name: "openclaw", version: "1.0.0" }),
+        JSON.stringify({ name: "@fredguile/openclaw", version: "1.0.0" }),
         "utf-8",
       );
       for (const relativePath of BUNDLED_RUNTIME_SIDECAR_PATHS) {

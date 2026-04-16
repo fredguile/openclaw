@@ -1,11 +1,11 @@
 ---
 name: openclaw-parallels-smoke
-description: End-to-end Parallels smoke, upgrade, and rerun workflow for OpenClaw across macOS, Windows, and Linux guests. Use when Codex needs to run, rerun, debug, or interpret VM-based install, onboarding, gateway smoke tests, latest-release-to-main upgrade checks, fresh snapshot retests, or optional Discord roundtrip verification under Parallels.
+description: End-to-end Parallels smoke, upgrade, and rerun workflow for @fredguile/openclaw across macOS, Windows, and Linux guests. Use when Codex needs to run, rerun, debug, or interpret VM-based install, onboarding, gateway smoke tests, latest-release-to-main upgrade checks, fresh snapshot retests, or optional Discord roundtrip verification under Parallels.
 ---
 
-# OpenClaw Parallels Smoke
+# @fredguile/openclaw Parallels Smoke
 
-Use this skill for Parallels guest workflows and smoke interpretation. Do not load it for normal repo work.
+Use this skill for Parallels guest workflows and smoke interpretation on the fork at `fredguile/openclaw`. Do not load it for normal repo work.
 
 ## Global rules
 
@@ -33,10 +33,10 @@ Use this skill for Parallels guest workflows and smoke interpretation. Do not lo
   - fresh snapshot -> install requested package/baseline -> smoke
   - same guest baseline -> run the guest's installed `openclaw update ...` command -> smoke again
 - The update lane must exercise OpenClaw's internal updater. Do not count a direct `npm install -g <tgz-or-spec>` or harness-side package swap as update-flow coverage; those are install smokes only.
-- For published targets, install the old baseline package first (for example `openclaw@2026.4.9`), then run the installed guest CLI with the intended channel/tag (for example `openclaw update --channel beta --yes --json`) and verify `openclaw --version`, `openclaw update status --json`, gateway RPC, and an agent turn after the command.
+- For published targets, install the old baseline package first (for example `@fredguile/openclaw@2026.4.9`), then run the installed guest CLI with the intended channel/tag (for example `openclaw update --channel beta --yes --json`) and verify `openclaw --version`, `openclaw update status --json`, gateway RPC, and an agent turn after the command.
 - For unpublished targets, pack the candidate on the host, serve the `.tgz` over the harness HTTP server, and point the guest updater at that served package. Prefer `openclaw update --tag http://<host-ip>:<port>/openclaw-<version>.tgz --yes --json`; when channel persistence also matters, pass `--channel <stable|beta>` and set `OPENCLAW_UPDATE_PACKAGE_SPEC` to the same served URL in the guest update environment. The command under test must still be `openclaw update`, not direct npm.
 - For unpublished local-fix validation, remember the old baseline updater code still controls the first hop. A fix that lives only in the new updater code cannot change that already-running old process; the served candidate must either keep package/plugin metadata compatible with the baseline host or the baseline itself must include the updater fix.
-- For beta/stable verification, resolve the tag immediately before the run (`npm view openclaw@beta version dist.tarball` or `npm view openclaw@latest ...`). Tags can move while a long VM matrix is already running; restart the matrix when the intended prerelease appears after an earlier registry 404/tag-lag check.
+- For beta/stable verification, resolve the tag immediately before the run (`npm view @fredguile/openclaw@beta version dist.tarball` or `npm view @fredguile/openclaw@latest ...`). Tags can move while a long VM matrix is already running; restart the matrix when the intended prerelease appears after an earlier registry 404/tag-lag check.
 - Source Peter's profile in the host shell (`set -a; source "$HOME/.profile"; set +a`) before OpenAI/Anthropic lanes. Do not print profile contents or env dumps; pass provider secrets through the guest exec environment.
 - Same-guest update verification should set the default model explicitly to `openai/gpt-5.4` before the agent turn and use a fresh explicit `--session-id` so old session model state does not leak into the check.
 - The aggregate npm-update wrapper must resolve the Linux VM with the same Ubuntu fallback policy as `parallels-linux-smoke.sh` before both fresh and update lanes. Treat any Ubuntu guest with major version `>= 24` as acceptable when the exact default VM is missing, preferring the closest version match. On Peter's current host today, missing `Ubuntu 24.04.3 ARM64` should fall back to `Ubuntu 25.10`.
@@ -85,7 +85,7 @@ Use this skill for Parallels guest workflows and smoke interpretation. Do not lo
 - Preferred entrypoint: `pnpm test:parallels:windows`
 - Use the snapshot closest to `pre-openclaw-native-e2e-2026-03-12`.
 - Default upgrade coverage on Windows should now include: fresh snapshot -> site installer pinned to the requested stable tag -> `openclaw update --channel dev` on the guest. Keep the older host-tgz upgrade path only when the caller explicitly passes `--target-package-spec`.
-- Optional exact npm-tag baseline on Windows: `bash scripts/e2e/parallels-windows-smoke.sh --mode upgrade --target-package-spec openclaw@<tag> --json`. That lane installs the published npm tarball as baseline, then runs `openclaw update --channel dev`.
+- Optional exact npm-tag baseline on Windows: `bash scripts/e2e/parallels-windows-smoke.sh --mode upgrade --target-package-spec @fredguile/openclaw@<tag> --json`. That lane installs the published npm tarball as baseline, then runs `openclaw update --channel dev`.
 - Optional forward-fix Windows validation: `bash scripts/e2e/parallels-windows-smoke.sh --mode upgrade --upgrade-from-packed-main --json`. That lane installs the packed current-main npm tgz as baseline, then runs `openclaw update --channel dev`.
 - Always use `prlctl exec --current-user`; plain `prlctl exec` lands in `NT AUTHORITY\\SYSTEM`.
 - Prefer explicit `npm.cmd` and `openclaw.cmd`.

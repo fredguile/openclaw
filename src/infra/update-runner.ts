@@ -102,7 +102,7 @@ const DEFAULT_TIMEOUT_MS = 20 * 60_000;
 const MAX_LOG_CHARS = 8000;
 const PREFLIGHT_MAX_COMMITS = 10;
 const START_DIRS = ["cwd", "argv1", "process"];
-const DEFAULT_PACKAGE_NAME = "openclaw";
+const DEFAULT_PACKAGE_NAME = "@fredguile/openclaw";
 const CORE_PACKAGE_NAMES = new Set([DEFAULT_PACKAGE_NAME]);
 const PREFLIGHT_TEMP_PREFIX =
   process.platform === "win32" ? "ocu-pf-" : "openclaw-update-preflight-";
@@ -1112,7 +1112,7 @@ export async function runGatewayUpdate(opts: UpdateRunnerOptions = {}): Promise<
     });
     const packageName = (await readPackageName(pkgRoot)) ?? DEFAULT_PACKAGE_NAME;
     await cleanupGlobalRenameDirs({
-      globalRoot: path.dirname(pkgRoot),
+      globalRoot: installTarget.globalRoot ?? path.dirname(pkgRoot),
       packageName,
     });
     const channel = opts.channel ?? DEFAULT_PACKAGE_CHANNEL;

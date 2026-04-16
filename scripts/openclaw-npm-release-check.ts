@@ -25,11 +25,12 @@ type PackageJson = {
 export type ParsedReleaseVersion = {
   version: string;
   baseVersion: string;
-  channel: "stable" | "beta";
+  channel: "stable" | "beta" | "verified";
   year: number;
   month: number;
   day: number;
   betaNumber?: number;
+  verifiedNumber?: number;
   correctionNumber?: number;
   date: Date;
 };
@@ -38,13 +39,13 @@ export type ParsedReleaseTag = {
   version: string;
   packageVersion: string;
   baseVersion: string;
-  channel: "stable" | "beta";
+  channel: "stable" | "beta" | "verified";
   correctionNumber?: number;
   date: Date;
 };
 
 export type NpmPublishPlan = {
-  channel: "stable" | "beta";
+  channel: "stable" | "beta" | "verified";
   publishTag: "latest" | "beta";
   mirrorDistTags: ("latest" | "beta")[];
 };
@@ -53,7 +54,7 @@ export type NpmDistTagMirrorAuth = {
   hasAuth: boolean;
   source: "node-auth-token" | "npm-token" | "none";
 };
-const EXPECTED_REPOSITORY_URL = "https://github.com/openclaw/openclaw";
+const EXPECTED_REPOSITORY_URL = "https://github.com/fredguile/openclaw";
 const MAX_CALVER_DISTANCE_DAYS = 2;
 const REQUIRED_PACKED_PATHS = ["dist/control-ui/index.html"];
 const CONTROL_UI_ASSET_PREFIX = "dist/control-ui/assets/";
@@ -116,6 +117,14 @@ export function resolveNpmPublishPlan(
     return {
       channel: "beta",
       publishTag: "beta",
+      mirrorDistTags: [],
+    };
+  }
+
+  if (parsedVersion.channel === "verified") {
+    return {
+      channel: "verified",
+      publishTag: "latest",
       mirrorDistTags: [],
     };
   }
@@ -183,8 +192,8 @@ export function collectReleasePackageMetadataErrors(pkg: PackageJson): string[] 
   );
   const errors: string[] = [];
 
-  if (pkg.name !== "openclaw") {
-    errors.push(`package.json name must be "openclaw"; found "${pkg.name ?? ""}".`);
+  if (pkg.name !== "@fredguile/openclaw") {
+    errors.push(`package.json name must be "@fredguile/openclaw"; found "${pkg.name ?? ""}".`);
   }
   if (!pkg.description?.trim()) {
     errors.push("package.json description must be non-empty.");
@@ -233,7 +242,7 @@ export function collectReleaseTagErrors(params: {
   const parsedVersion = parseReleaseVersion(packageVersion);
   if (parsedVersion === null) {
     errors.push(
-      `package.json version must match YYYY.M.D, YYYY.M.D-N, or YYYY.M.D-beta.N; found "${packageVersion || "<missing>"}".`,
+      `package.json version must match YYYY.M.D, YYYY.M.D-N, YYYY.M.D-beta.N, or YYYY.M.D-verified.N; found "${packageVersion || "<missing>"}".`,
     );
   }
 
@@ -245,7 +254,7 @@ export function collectReleaseTagErrors(params: {
   const parsedTag = parseReleaseTagVersion(tagVersion);
   if (parsedTag === null) {
     errors.push(
-      `Release tag must match vYYYY.M.D, vYYYY.M.D-beta.N, or fallback correction tag vYYYY.M.D-N; found "${releaseTag || "<missing>"}".`,
+      `Release tag must match vYYYY.M.D, vYYYY.M.D-beta.N, vYYYY.M.D-verified.N, or fallback correction tag vYYYY.M.D-N; found "${releaseTag || "<missing>"}".`,
     );
   }
 
@@ -258,6 +267,8 @@ export function collectReleaseTagErrors(params: {
       (parsedVersion.channel === "stable" &&
         parsedVersion.correctionNumber === undefined &&
         parsedTag.correctionNumber !== undefined &&
+        parsedTag.baseVersion === parsedVersion.baseVersion) ||
+      (parsedVersion.channel === "verified" &&
         parsedTag.baseVersion === parsedVersion.baseVersion));
   if (!matchesExpectedTag) {
     errors.push(

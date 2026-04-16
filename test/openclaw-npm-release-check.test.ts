@@ -39,6 +39,18 @@ describe("parseReleaseVersion", () => {
     });
   });
 
+  it("parses verified CalVer releases", () => {
+    expect(parseReleaseVersion("2026.3.10-verified.1")).toMatchObject({
+      version: "2026.3.10-verified.1",
+      baseVersion: "2026.3.10",
+      channel: "verified",
+      year: 2026,
+      month: 3,
+      day: 10,
+      verifiedNumber: 1,
+    });
+  });
+
   it("parses stable correction releases", () => {
     expect(parseReleaseVersion("2026.3.10-1")).toMatchObject({
       version: "2026.3.10-1",
@@ -56,6 +68,7 @@ describe("parseReleaseVersion", () => {
     expect(parseReleaseVersion("v2026.3.10")).toBeNull();
     expect(parseReleaseVersion("2026.2.30")).toBeNull();
     expect(parseReleaseVersion("2026.3.10-0")).toBeNull();
+    expect(parseReleaseVersion("2026.3.10-verified.0")).toBeNull();
     expect(parseReleaseVersion("2.0.0-beta2")).toBeNull();
   });
 });
@@ -114,6 +127,22 @@ describe("resolveNpmPublishPlan", () => {
     expect(resolveNpmPublishPlan("2026.3.29", "2026.4.1-beta.1")).toEqual({
       channel: "stable",
       publishTag: "beta",
+      mirrorDistTags: [],
+    });
+  });
+
+  it("publishes verified releases to latest", () => {
+    expect(resolveNpmPublishPlan("2026.3.29-verified.1")).toEqual({
+      channel: "verified",
+      publishTag: "latest",
+      mirrorDistTags: [],
+    });
+  });
+
+  it("publishes verified releases to latest when requested", () => {
+    expect(resolveNpmPublishPlan("2026.3.29-verified.1", undefined, "latest")).toEqual({
+      channel: "verified",
+      publishTag: "latest",
       mirrorDistTags: [],
     });
   });
@@ -188,6 +217,18 @@ describe("shouldSkipPackedTarballValidation", () => {
 describe("compareReleaseVersions", () => {
   it("treats stable as newer than same-day beta", () => {
     expect(compareReleaseVersions("2026.3.29", "2026.3.29-beta.2")).toBe(1);
+  });
+
+  it("treats verified as newer than same-day beta", () => {
+    expect(compareReleaseVersions("2026.3.29-verified.1", "2026.3.29-beta.2")).toBe(1);
+  });
+
+  it("treats stable as newer than same-day verified", () => {
+    expect(compareReleaseVersions("2026.3.29", "2026.3.29-verified.1")).toBe(1);
+  });
+
+  it("orders verified releases by verified number", () => {
+    expect(compareReleaseVersions("2026.3.29-verified.2", "2026.3.29-verified.1")).toBe(1);
   });
 
   it("treats a newer beta day as newer than an older stable day", () => {
@@ -380,10 +421,10 @@ describe("collectReleasePackageMetadataErrors", () => {
   it("validates the expected npm package metadata", () => {
     expect(
       collectReleasePackageMetadataErrors({
-        name: "openclaw",
+        name: "@fredguile/openclaw",
         description: "Multi-channel AI gateway with extensible messaging integrations",
         license: "MIT",
-        repository: { url: "git+https://github.com/openclaw/openclaw.git" },
+        repository: { url: "git+https://github.com/fredguile/openclaw.git" },
         bin: { openclaw: "openclaw.mjs" },
         peerDependencies: { "node-llama-cpp": "3.18.1" },
         peerDependenciesMeta: { "node-llama-cpp": { optional: true } },
@@ -394,10 +435,10 @@ describe("collectReleasePackageMetadataErrors", () => {
   it("requires node-llama-cpp to stay an optional peer", () => {
     expect(
       collectReleasePackageMetadataErrors({
-        name: "openclaw",
+        name: "@fredguile/openclaw",
         description: "Multi-channel AI gateway with extensible messaging integrations",
         license: "MIT",
-        repository: { url: "git+https://github.com/openclaw/openclaw.git" },
+        repository: { url: "git+https://github.com/fredguile/openclaw.git" },
         bin: { openclaw: "openclaw.mjs" },
         peerDependencies: { "node-llama-cpp": "3.18.1" },
       }),

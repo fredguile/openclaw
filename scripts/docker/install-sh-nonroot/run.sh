@@ -2,7 +2,7 @@
 set -euo pipefail
 
 INSTALL_URL="${OPENCLAW_INSTALL_URL:-https://openclaw.bot/install.sh}"
-DEFAULT_PACKAGE="openclaw"
+DEFAULT_PACKAGE="@fredguile/openclaw"
 PACKAGE_NAME="${OPENCLAW_INSTALL_PACKAGE:-$DEFAULT_PACKAGE}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 

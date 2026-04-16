@@ -1,8 +1,17 @@
 # Repository Guidelines
 
-- Repo: https://github.com/openclaw/openclaw
+- Repo: https://github.com/fredguile/openclaw (fork of https://github.com/openclaw/openclaw)
+- NPM package: `@fredguile/openclaw`
 - In chat replies, file references must be repo-root relative only (example: `src/telegram/index.ts:80`); never absolute paths or `~/...`.
 - Do not edit files covered by security-focused `CODEOWNERS` rules unless a listed owner explicitly asked for the change or is already reviewing it with you. Treat those paths as restricted surfaces, not drive-by cleanup.
+
+## Fork Policy
+
+- This is a personal fork of the upstream OpenClaw project at https://github.com/openclaw/openclaw.
+- The fork is published to NPM as `@fredguile/openclaw`.
+- Upstream sync: periodically pull changes from the upstream origin (`https://github.com/openclaw/openclaw`) and merge potential conflicts into this fork, typically upon new OpenClaw releases. Use `git fetch upstream && git merge upstream/main` (or rebase) to integrate upstream changes.
+- **No upstream contributions:** do NOT open pull requests to the upstream repo at `https://github.com/openclaw/openclaw`. All pull requests and issues should be opened against this fork only (`https://github.com/fredguile/openclaw`).
+- When resolving merge conflicts from upstream syncs, prefer upstream's changes for shared/core code unless the fork has intentional divergences that must be preserved.
 
 ## Project Structure & Module Organization
 
@@ -239,6 +248,7 @@
 - Create commits with `scripts/committer "<msg>" <file...>`; avoid manual `git add`/`git commit` so staging stays scoped.
 - Follow concise, action-oriented commit messages (e.g., `CLI: add verbose flag to send`).
 - Group related changes; avoid bundling unrelated refactors.
+- PRs and issues are opened against this fork only (`https://github.com/fredguile/openclaw`); do NOT open PRs against the upstream `https://github.com/openclaw/openclaw`.
 - PR submission template (canonical): `.github/pull_request_template.md`
 - Issue submission templates (canonical): `.github/ISSUE_TEMPLATE/`
 

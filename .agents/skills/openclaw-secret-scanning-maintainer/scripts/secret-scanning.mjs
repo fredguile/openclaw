@@ -8,7 +8,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const REPO = "openclaw/openclaw";
+const REPO = "fredguile/openclaw";
 const REPO_URL = `https://github.com/${REPO}`;
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
