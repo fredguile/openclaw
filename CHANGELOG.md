@@ -8,6 +8,14 @@ Docs: https://docs.openclaw.ai
 
 ### Fixes
 
+## 2026.4.16-verified.1
+
+### Changes
+
+- Android/http.request: add `http.request` node invoke command, allowing the gateway to instruct connected Android nodes to make outbound HTTP requests (GET, POST, etc.) and relay the response back to the agent. Includes a new `HttpHandler` on the Android side with method/headers/body/timeout support, invoke-command registration and dispatch wiring, protocol constants, and full gateway-side allowlist gating scoped to the Android platform only. (#3)
+
+### Fixes
+
 ## 2026.4.14
 
 ### Changes
