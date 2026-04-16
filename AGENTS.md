@@ -12,6 +12,9 @@
 - Upstream sync: periodically pull changes from the upstream origin (`https://github.com/openclaw/openclaw`) and merge potential conflicts into this fork, typically upon new OpenClaw releases. Use `git fetch upstream && git merge upstream/main` (or rebase) to integrate upstream changes.
 - **No upstream contributions:** do NOT open pull requests to the upstream repo at `https://github.com/openclaw/openclaw`. All pull requests and issues should be opened against this fork only (`https://github.com/fredguile/openclaw`).
 - When resolving merge conflicts from upstream syncs, prefer upstream's changes for shared/core code unless the fork has intentional divergences that must be preserved.
+- Fork script divergences from upstream (preserve during upstream syncs):
+  - `scripts/release-check.ts` resolves the packed install root as `@fredguile/openclaw` (upstream uses unscoped `openclaw`).
+  - `scripts/openclaw-npm-postpublish-verify.ts` omits the upstream `openclaw@...` install scenario; the fork only verifies its own package.
 
 ## Project Structure & Module Organization
 

@@ -46,7 +46,7 @@ export type ParsedReleaseTag = {
 
 export type NpmPublishPlan = {
   channel: "stable" | "beta" | "verified";
-  publishTag: "latest" | "beta";
+  publishTag: "latest" | "beta" | "verified";
   mirrorDistTags: ("latest" | "beta")[];
 };
 
@@ -108,7 +108,12 @@ export function resolveNpmPublishPlan(
     throw new Error(`Unsupported release version "${version}".`);
   }
 
-  const publishTag = requestedPublishTag?.trim() === "latest" ? "latest" : "beta";
+  const publishTag =
+    requestedPublishTag?.trim() === "latest"
+      ? "latest"
+      : requestedPublishTag?.trim() === "verified"
+        ? "verified"
+        : "beta";
 
   if (parsedVersion.channel === "beta") {
     if (publishTag !== "beta") {
@@ -124,7 +129,7 @@ export function resolveNpmPublishPlan(
   if (parsedVersion.channel === "verified") {
     return {
       channel: "verified",
-      publishTag: "latest",
+      publishTag: publishTag === "latest" ? "verified" : publishTag,
       mirrorDistTags: [],
     };
   }

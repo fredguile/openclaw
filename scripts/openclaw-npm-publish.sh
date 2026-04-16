@@ -24,7 +24,9 @@ mapfile -t publish_plan < <(
 import { resolveNpmPublishPlan } from "./scripts/openclaw-npm-release-check.ts";
 
 const requestedPublishTag =
-  process.env.REQUESTED_PUBLISH_TAG === "latest" ? "latest" : "beta";
+  process.env.REQUESTED_PUBLISH_TAG === "latest" ? "latest" :
+  process.env.REQUESTED_PUBLISH_TAG === "verified" ? "verified" :
+  "beta";
 const plan = resolveNpmPublishPlan(process.env.PACKAGE_VERSION ?? "", undefined, requestedPublishTag);
 console.log(plan.channel);
 console.log(plan.publishTag);

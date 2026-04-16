@@ -132,10 +132,15 @@ node --import tsx scripts/openclaw-npm-postpublish-verify.ts <published-version>
 ## npm publish for the fork
 
 - The fork publishes as `@fredguile/openclaw` on npm.
-- Beta releases publish with `--tag beta`.
-- Verified releases publish with `--tag latest` (the default).
-- After a verified publish, also update the `beta` dist-tag to point at the same version so both channels are current:
+- First publish of a scoped package requires `--access public` (subsequent publishes remember it).
+- Beta releases publish with `--tag beta`:
   ```bash
+  npm publish --access public --tag beta
+  ```
+- Verified releases: npm treats `-verified.N` as a semver prerelease, so publish under an explicit tag first, then point `latest` at it:
+  ```bash
+  npm publish --access public --tag verified
+  npm dist-tag add @fredguile/openclaw@<version> latest
   npm dist-tag add @fredguile/openclaw@<version> beta
   ```
 - The publish workflow is manual. Creating or pushing a tag does not publish by itself.
@@ -193,12 +198,13 @@ node --import tsx scripts/openclaw-npm-postpublish-verify.ts <published-version>
 9. Confirm the target npm version is not already published.
 10. Create and push the git tag.
 11. Create or refresh the matching GitHub release titled `openclaw YYYY.M.D-verified.N`.
-12. Publish to npm: `npm publish` (publishes to `latest` by default).
-13. Update the `beta` dist-tag to match:
+12. Publish to npm:
     ```bash
+    npm publish --access public --tag verified
+    npm dist-tag add @fredguile/openclaw@<version> latest
     npm dist-tag add @fredguile/openclaw@<version> beta
     ```
-14. Verify npm package and release assets.
+13. Verify npm package and release assets.
 
 ## GHSA advisory work
 
