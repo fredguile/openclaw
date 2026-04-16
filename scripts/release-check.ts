@@ -193,7 +193,7 @@ function runPackedBundledChannelEntrySmoke(): void {
     const prefixDir = join(tmpRoot, "prefix");
     installPackedTarball(prefixDir, tarballPath, tmpRoot);
 
-    const packageRoot = join(resolveGlobalRoot(prefixDir, tmpRoot), "openclaw");
+    const packageRoot = join(resolveGlobalRoot(prefixDir, tmpRoot), "@fredguile", "openclaw");
     execFileSync(
       process.execPath,
       [
