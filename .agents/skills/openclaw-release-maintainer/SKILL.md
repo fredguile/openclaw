@@ -114,7 +114,25 @@ node --import tsx scripts/openclaw-npm-postpublish-verify.ts <published-version>
 ```
 
 - This verifies the published registry install path in a fresh temp prefix.
-- Treat install smoke as a pack-budget gate. `pnpm test:install:smoke` fails the candidate when npm reports an oversized `unpackedSize`.
+- For stable correction releases like `YYYY.M.D-N`, it also verifies the
+  upgrade path from `YYYY.M.D` to `YYYY.M.D-N` so a correction publish cannot
+  silently leave existing global installs on the old base stable payload.
+- Treat install smoke as a pack-budget gate too. `pnpm test:install:smoke`
+  now fails the candidate update tarball when npm reports an oversized
+  `unpackedSize`, so release-time e2e cannot miss pack bloat that would risk
+  low-memory install/startup failures.
+- Keep direct npm global coverage enabled in install smoke. It exercises plain
+  `npm install -g <candidate>` fresh installs and npm-driven update installs,
+  because many users install with npm even when docs prefer pnpm.
+- Use `pnpm test:live:media video` for bounded video-provider smoke when video
+  generation is in release scope. The default video smoke skips `fal`, runs one
+  text-to-video attempt per provider with a one-second lobster prompt, and caps
+  each provider operation with `OPENCLAW_LIVE_VIDEO_GENERATION_TIMEOUT_MS`
+  (`180000` by default).
+- Run `pnpm test:live:media video --video-providers fal` only when FAL-specific
+  proof is required. Its queue latency can dominate release time.
+- Set `OPENCLAW_LIVE_VIDEO_GENERATION_FULL_MODES=1` only when intentionally
+  validating the slower image-to-video and video-to-video transform lanes.
 
 ## Check all relevant release builds
 
@@ -126,7 +144,27 @@ node --import tsx scripts/openclaw-npm-postpublish-verify.ts <published-version>
   - `pnpm release:check`
   - `OPENCLAW_INSTALL_SMOKE_SKIP_NONROOT=1 pnpm test:install:smoke`
 - Check all release-related build surfaces touched by the release, not only the npm package.
-- Any fix after preflight means a new commit. Delete and recreate the tag and matching GitHub release from the fixed commit, then rerun preflight from scratch before publishing.
+- For beta-style full e2e batteries, hard-cap top-level long lanes instead of letting them run indefinitely. Use host `timeout --foreground`/`gtimeout --foreground` caps such as:
+  - `45m` for `OPENCLAW_INSTALL_SMOKE_SKIP_NONROOT=1 pnpm test:install:smoke`
+  - `90m` for `pnpm test:docker:all`
+  - Parallels caps from the `openclaw-parallels-smoke` skill
+    If a lane hits its cap, stop and inspect/fix the affected lane before continuing; do not continue to wait on the same process.
+- Actual npm install/update phases are capped at 5 minutes. If `npm install -g`, installer package install, or `openclaw update` takes longer than 300s in release e2e, stop treating the run as healthy progress and debug the installer/updater or harness.
+- Serialize host build/package mutations ahead of VM lanes. Finish `pnpm build`, `pnpm ui:build`, `pnpm release:check`, install smoke, and any Docker/package-prep lanes before starting Parallels `npm pack` lanes; otherwise `dist` can disappear during VM pack prep and produce false failures.
+- Include mac release readiness in preflight by running the public validation
+  workflow in `openclaw/openclaw` and the real mac preflight in
+  `openclaw/releases-private` for every release.
+- Treat the `appcast.xml` update on `main` as part of mac release readiness, not an optional follow-up.
+- The workflows remain tag-based. The agent is responsible for making sure
+  preflight runs complete successfully before any publish run starts.
+- Any fix after preflight means a new commit. Delete and recreate the tag and
+  matching GitHub release from the fixed commit, then rerun preflight from
+  scratch before publishing.
+- For stable mac releases, generate the signed `appcast.xml` before uploading
+  public release assets so the updater feed cannot lag the published binaries.
+- Serialize stable appcast-producing runs across tags so two releases do not
+  generate replacement `appcast.xml` files from the same stale seed.
+- For stable releases, confirm the latest beta already passed the broader release workflows before cutting stable.
 - If any required build, packaging step, or release workflow is red, do not say the release is ready.
 
 ## npm publish for the fork
