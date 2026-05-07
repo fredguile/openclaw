@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
-import { Static, Type } from "@sinclair/typebox";
 import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
 import { normalizeOptionalString } from "openclaw/plugin-sdk/text-runtime";
+import { Static, Type, type TSchema } from "typebox";
 import type { AnyAgentTool, OpenClawPluginApi, OpenClawPluginToolContext } from "../api.js";
 import { PlaywrightDiffScreenshotter, type DiffScreenshotter } from "./browser.js";
 import { resolveDiffImageRenderOptions } from "./config.js";
@@ -34,12 +34,12 @@ const MAX_TITLE_BYTES = 1_024;
 const MAX_PATH_BYTES = 2_048;
 const MAX_LANG_BYTES = 128;
 
-function stringEnum<T extends readonly string[]>(values: T, description: string) {
-  return Type.Unsafe<T[number]>({
-    type: "string",
-    enum: [...values],
-    description,
-  });
+// oxlint-disable-next-line typescript/no-unnecessary-type-parameters -- T needed to infer tuple type for literal union.
+function stringEnum<T extends readonly string[]>(values: T, description: string): TSchema {
+  return Type.Union(
+    values.map((v) => Type.Literal(v)),
+    description ? { description } : undefined,
+  );
 }
 
 const DiffsToolSchema = Type.Object(
@@ -158,17 +158,27 @@ export function createDiffsTool(params: {
       const toolParams = rawParams as DiffsToolRawParams;
       const artifactContext = buildArtifactContext(params.context);
       const input = normalizeDiffInput(toolParams);
-      const mode = normalizeMode(toolParams.mode, params.defaults.mode);
-      const theme = normalizeTheme(toolParams.theme, params.defaults.theme);
-      const layout = normalizeLayout(toolParams.layout, params.defaults.layout);
+      const mode = normalizeMode(toolParams.mode as DiffMode | undefined, params.defaults.mode);
+      const theme = normalizeTheme(
+        toolParams.theme as DiffTheme | undefined,
+        params.defaults.theme,
+      );
+      const layout = normalizeLayout(
+        toolParams.layout as DiffLayout | undefined,
+        params.defaults.layout,
+      );
       const expandUnchanged = toolParams.expandUnchanged === true;
       const ttlMs = normalizeTtlMs(toolParams.ttlSeconds);
       const image = resolveDiffImageRenderOptions({
         defaults: params.defaults,
         fileFormat: normalizeOutputFormat(
-          toolParams.fileFormat ?? toolParams.imageFormat ?? toolParams.format,
+          (toolParams.fileFormat ?? toolParams.imageFormat ?? toolParams.format) as
+            | DiffOutputFormat
+            | undefined,
         ),
-        fileQuality: normalizeFileQuality(toolParams.fileQuality ?? toolParams.imageQuality),
+        fileQuality: normalizeFileQuality(
+          (toolParams.fileQuality ?? toolParams.imageQuality) as DiffImageQualityPreset | undefined,
+        ),
         fileScale: toolParams.fileScale ?? toolParams.imageScale,
         fileMaxWidth: toolParams.fileMaxWidth ?? toolParams.imageMaxWidth,
       });

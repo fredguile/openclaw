@@ -3,6 +3,7 @@ import {
   createInboundDebouncer,
   resolveInboundDebounceMs,
 } from "openclaw/plugin-sdk/reply-runtime";
+import type { OutputRuntimeEnv } from "openclaw/plugin-sdk/runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createNonExitingRuntimeEnv } from "../../../test/helpers/plugins/runtime-env.js";
 import type { ClawdbotConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
@@ -23,7 +24,8 @@ const monitorWebhookMock = vi.hoisted(() => vi.fn(async () => {}));
 const createFeishuThreadBindingManagerMock = vi.hoisted(() => vi.fn(() => ({ stop: vi.fn() })));
 
 let handlers: Record<string, (data: unknown) => Promise<void>> = {};
-let lastRuntime: ReturnType<typeof createNonExitingRuntimeEnv> | null = null;
+// eslint-disable-next-line typescript-eslint/no-redundant-type-constituents -- OutputRuntimeEnv is an error type that absorbs the union
+let lastRuntime: OutputRuntimeEnv | null = null;
 const TEST_DOC_TOKEN = "ZsJfdxrBFo0RwuxteOLc1Ekvneb";
 const TEST_WIKI_TOKEN = "OtYpd5pKOoMeQzxrzkocv9KIn4H";
 
